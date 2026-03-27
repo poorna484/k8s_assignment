@@ -2,46 +2,38 @@ pipeline {
     agent any
 
     environment {
-        // Jenkins secret file containing kubeconfig for an accessible cluster
-        KUBECONFIG = credentials('kubeconfig-secret')
+        KUBECONFIG = credentials('kubeconfig')  // Jenkins secret file ID
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
-                echo 'Checking out repository...'
-                git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git', credentialsId: 'git_credentials'
+                git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git'
             }
         }
 
-        stage('Verify Pod File') {
+        stage('Verify Files') {
             steps {
-                echo 'Listing pod.yaml...'
-                sh 'ls -l pod.yaml'
+                sh 'ls -l'
             }
         }
 
-        stage('Deploy Pod to Kubernetes') {
+        stage('Deploy Pod') {
             steps {
-                echo 'Applying pod.yaml to Kubernetes cluster...'
-                sh 'kubectl apply -f pod.yaml'
+                sh '''
+                # Apply pod.yaml to the cluster
+                kubectl apply -f pod.yaml
+                # Verify pod status
+                kubectl get pods -o wide
+                '''
             }
         }
 
-        stage('Verify Pod Deployment') {
+        stage('Post-Deployment') {
             steps {
-                echo 'Getting pod status...'
-                sh 'kubectl get pods -o wide'
+                echo "Deployment finished successfully!"
             }
-        }
-    }
-
-    post {
-        success {
-            echo 'Pipeline completed successfully!'
-        }
-        failure {
-            echo 'Pipeline failed!'
         }
     }
 }
