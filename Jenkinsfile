@@ -2,36 +2,39 @@ pipeline {
     agent any
 
     environment {
-        KUBECONFIG = '/home/ubuntu/.kube/config' // Path to Minikube kubeconfig
+        // Inject the kubeconfig file stored in Jenkins credentials
+        KUBECONFIG = credentials('kubeconfig')
     }
 
     stages {
-        stage('Create Pod') {
-            steps {
-                sh """
-                    echo 'apiVersion: v1
-                    kind: Pod
-                    metadata:
-                      name: my-pod
-                      labels:
-                        app: my-app
-                    spec:
-                      containers:
-                      - name: my-container
-                        image: nginx:latest
-                        ports:
-                        - containerPort: 80' > pod.yaml
 
-                    kubectl apply -f pod.yaml
-                    kubectl get pods -o wide
-                """
+        stage('Checkout Code') {
+            steps {
+                // Checkout your repository (optional if pod.yaml is already in workspace)
+                git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git'
             }
         }
+
+        stage('Verify Pod File') {
+            steps {
+                sh 'ls -l pod.yaml'
+            }
+        }
+
+        stage('Apply Pod') {
+            steps {
+                sh 'kubectl apply -f pod.yaml'
+            }
+        }
+
     }
 
     post {
-        always {
-            echo 'Finished pipeline'
+        success {
+            echo 'Pod applied successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
