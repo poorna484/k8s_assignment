@@ -9,7 +9,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/poorna484/k8s_assignment.git'
+                git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git'
             }
         }
 
