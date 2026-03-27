@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    environment {
+        // Replace 'kubeconfig-secret' with the ID of your Jenkins secret file containing kubeconfig
+        KUBECONFIG = credentials('kubeconfig')
+    }
+
     stages {
         stage('Checkout Code') {
             steps {
@@ -16,25 +21,24 @@ pipeline {
             }
         }
 
-        stage('Apply Pod to Kubernetes') {
+        stage('Deploy Pod to Kubernetes') {
             steps {
-                echo 'Applying pod.yaml using minikube kubectl...'
-                // Using minikube's kubectl wrapper to avoid kubeconfig/auth issues
-                sh 'minikube kubectl -- apply -f pod.yaml'
+                echo 'Applying pod.yaml to Kubernetes cluster...'
+                sh 'kubectl apply -f pod.yaml'
             }
         }
 
-        stage('Verify Pod') {
+        stage('Verify Pod Deployment') {
             steps {
                 echo 'Getting pod status...'
-                sh 'minikube kubectl -- get pods -o wide'
+                sh 'kubectl get pods -o wide'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline succeeded!'
+            echo 'Pipeline completed successfully!'
         }
         failure {
             echo 'Pipeline failed!'
