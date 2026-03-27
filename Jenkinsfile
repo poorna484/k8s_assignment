@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        K8S_TOKEN = credentials('k8s-token')   // Your Jenkins Secret Text ID
-        K8S_SERVER = 'https://127.0.0.1:6443'  // Replace with your cluster API if not Minikube
+        KUBECONFIG = credentials('kubeconfig')  // Use your kubeconfig secret
     }
 
     stages {
@@ -23,16 +22,8 @@ pipeline {
         stage('Deploy Pod') {
             steps {
                 sh '''
-                # Create temporary kubeconfig using token
-                kubectl config set-cluster jenkins-cluster --server=$K8S_SERVER --insecure-skip-tls-verify=true
-                kubectl config set-credentials jenkins-user --token=$K8S_TOKEN
-                kubectl config set-context jenkins-context --cluster=jenkins-cluster --user=jenkins-user
-                kubectl config use-context jenkins-context
-
-                # Apply pod.yaml to deploy pod
+                # Use kubeconfig to deploy pod
                 kubectl apply -f pod.yaml
-
-                # Verify pod status
                 kubectl get pods -o wide
                 '''
             }
