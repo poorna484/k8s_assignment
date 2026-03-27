@@ -2,12 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // Use the Secret File you uploaded
-        KUBECONFIG = credentials('kubeconfig') 
+        KUBECONFIG = '/var/lib/jenkins/.kube/config'
     }
 
     stages {
-
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git'
@@ -22,19 +20,12 @@ pipeline {
 
         stage('Apply Pod') {
             steps {
-                sh '''
-                echo "Using kubeconfig at $KUBECONFIG"
-                kubectl apply -f pod.yaml
-                '''
+                sh 'kubectl apply -f pod.yaml'
             }
         }
-
     }
 
     post {
-        success {
-            echo 'Pod applied successfully!'
-        }
         failure {
             echo 'Pipeline failed!'
         }
