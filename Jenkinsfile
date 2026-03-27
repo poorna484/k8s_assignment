@@ -2,15 +2,14 @@ pipeline {
     agent any
 
     environment {
-        // Inject the kubeconfig file stored in Jenkins credentials
-        KUBECONFIG = credentials('kubeconfig')
+        // Inject the kubeconfig file stored in Jenkins as a Secret File
+        KUBECONFIG = credentials('kubeconfig') 
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                // Checkout your repository (optional if pod.yaml is already in workspace)
                 git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git'
             }
         }
@@ -23,7 +22,11 @@ pipeline {
 
         stage('Apply Pod') {
             steps {
-                sh 'kubectl apply -f pod.yaml'
+                // Ensure the shell sees KUBECONFIG path
+                sh '''
+                echo "Using kubeconfig at $KUBECONFIG"
+                kubectl apply -f pod.yaml
+                '''
             }
         }
 
