@@ -2,59 +2,40 @@ pipeline {
     agent any
 
     environment {
-        K8S_TOKEN  = credentials('k8s-token')  // The Jenkins Secret Text ID
-        K8S_SERVER = 'https://127.0.0.1:6443' // Replace with your Kubernetes API server
+        KUBECONFIG_CREDENTIAL = 'kubeconfig'
     }
 
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git'
-            }
-        }
-
-        stage('Verify Files') {
-            steps {
-                sh 'ls -l'
-            }
-        }
-
-        stage('Configure kubectl') {
-            steps {
-                sh '''
-                # Configure temporary kubeconfig
-                kubectl config set-cluster jenkins-cluster --server=$K8S_SERVER --insecure-skip-tls-verify=true
-                kubectl config set-credentials jenkins-user --token=$K8S_TOKEN
-                kubectl config set-context jenkins-context --cluster=jenkins-cluster --user=jenkins-user
-                kubectl config use-context jenkins-context
-                '''
+                git branch: 'main', 
+                    url: 'https://github.com/poorna484/k8s_assignment.git'
             }
         }
 
         stage('Deploy Pod') {
             steps {
-                sh '''
-                echo "Deploying pod..."
-                kubectl apply -f pod.yaml
-                kubectl get pods -o wide
-                '''
+                withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL}", variable: 'KUBECONFIG')]) {
+                    
+                    sh '''
+                    export KUBECONFIG=$KUBECONFIG
+                    kubectl apply -f pod.yaml
+                    '''
+                }
             }
         }
 
-        stage('Post-Deployment') {
+        stage('Verify Pod') {
             steps {
-                echo "Deployment completed successfully!"
+                withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL}", variable: 'KUBECONFIG')]) {
+                    
+                    sh '''
+                    export KUBECONFIG=$KUBECONFIG
+                    kubectl get pods
+                    '''
+                }
             }
-        }
-    }
-
-    post {
-        failure {
-            echo "Pipeline failed. Check logs for errors."
-        }
-        success {
-            echo "Pipeline finished successfully."
         }
     }
 }
