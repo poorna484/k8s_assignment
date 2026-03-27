@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    environment {
-        KUBECONFIG_CREDENTIAL = 'kubeconfig'
-    }
-
     stages {
 
         stage('Checkout Code') {
@@ -16,25 +12,19 @@ pipeline {
 
         stage('Deploy Pod') {
             steps {
-                withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL}", variable: 'KUBECONFIG')]) {
-                    
-                    sh '''
-                    export KUBECONFIG=$KUBECONFIG
-                    kubectl apply -f pod.yaml
-                    '''
-                }
+                sh '''
+                export KUBECONFIG=/var/lib/jenkins/.kube/config
+                kubectl apply -f pod.yaml
+                '''
             }
         }
 
         stage('Verify Pod') {
             steps {
-                withCredentials([file(credentialsId: "${KUBECONFIG_CREDENTIAL}", variable: 'KUBECONFIG')]) {
-                    
-                    sh '''
-                    export KUBECONFIG=$KUBECONFIG
-                    kubectl get pods
-                    '''
-                }
+                sh '''
+                export KUBECONFIG=/var/lib/jenkins/.kube/config
+                kubectl get pods
+                '''
             }
         }
     }
