@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Inject the kubeconfig file stored in Jenkins as a Secret File
+        // Use the Secret File you uploaded
         KUBECONFIG = credentials('kubeconfig') 
     }
 
@@ -22,7 +22,6 @@ pipeline {
 
         stage('Apply Pod') {
             steps {
-                // Ensure the shell sees KUBECONFIG path
                 sh '''
                 echo "Using kubeconfig at $KUBECONFIG"
                 kubectl apply -f pod.yaml
