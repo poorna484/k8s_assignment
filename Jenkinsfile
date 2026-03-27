@@ -1,19 +1,22 @@
 pipeline {
     agent any
 
+    environment {
+        KUBECONFIG = credentials('kubeconfig')
+    }
+
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main', 
-                    url: 'https://github.com/poorna484/k8s_assignment.git'
+                git 'https://github.com/poorna484/k8s_assignment.git'
             }
         }
 
-        stage('Deploy Pod') {
+        stage('Deploy Pod to Kubernetes') {
             steps {
                 sh '''
-                export KUBECONFIG=/var/lib/jenkins/.kube/config
+                export KUBECONFIG=$KUBECONFIG
                 kubectl apply -f pod.yaml
                 '''
             }
@@ -22,7 +25,7 @@ pipeline {
         stage('Verify Pod') {
             steps {
                 sh '''
-                export KUBECONFIG=/var/lib/jenkins/.kube/config
+                export KUBECONFIG=$KUBECONFIG
                 kubectl get pods
                 '''
             }
