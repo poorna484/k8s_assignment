@@ -1,41 +1,24 @@
 pipeline {
     agent { label 'my-node' }
 
-    environment {
-        KUBECONFIG = credentials('kubeconfig')
-    }
-
     stages {
 
         stage('Checkout Code') {
             steps {
-                git branch: 'main',
-                    url: '',https://github.com/poorna484/k8s_assignment.git
+                git url: 'https://github.com/poorna484/k8s_assignment.git',
                     credentialsId: 'git_credentials'
             }
         }
 
-        stage('Verify Files') {
+        stage('Verify YAML') {
             steps {
-                sh 'ls -l'
+                sh 'cat pod.yaml'
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Deploy Pod') {
             steps {
-                sh '''
-                export KUBECONFIG=$KUBECONFIG
-                kubectl apply -f pod.yaml
-                '''
-            }
-        }
-
-        stage('Verify Deployment') {
-            steps {
-                sh '''
-                export KUBECONFIG=$KUBECONFIG
-                kubectl get pods
-                '''
+                sh 'kubectl apply -f pod.yaml'
             }
         }
     }
