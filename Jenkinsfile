@@ -1,12 +1,12 @@
 pipeline {
-    agent any
+    agent { label 'my-node' }   // 👈 Use your custom node
 
     stages {
 
         stage('Checkout Code') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/poorna484/k8s_assignment.git'
+                url: 'https://github.com/<your-username>/<repo-name>.git'
             }
         }
 
