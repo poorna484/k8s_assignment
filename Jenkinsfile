@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Replace 'kubeconfig-secret' with the ID of your Jenkins secret file containing kubeconfig
-        KUBECONFIG = credentials('kubeconfig')
+        // Jenkins secret file containing kubeconfig for an accessible cluster
+        KUBECONFIG = credentials('kubeconfig-secret')
     }
 
     stages {
