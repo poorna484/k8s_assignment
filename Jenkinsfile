@@ -2,30 +2,38 @@ pipeline {
     agent any
 
     environment {
-        // Kubeconfig credential ID
-        KUBECONFIG = credentials('git_credentials')  
+        KUBECONFIG = credentials('kubeconfig') // Jenkins credential ID for your kubeconfig
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                // Use Git credentials to clone the repo
-                git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git', credentialsId: 'git_credentials'
+                // Checkout your repository containing pod.yaml
+                git branch: 'main', url: 'https://github.com/poorna484/k8s_assignment.git'
             }
         }
 
-        stage('Deploy Pod') {
+        stage('Create Pod') {
             steps {
-                // Deploy the pod using the YAML file in repo
+                // Apply the pod manifest
                 sh 'kubectl apply -f pod.yaml'
             }
         }
 
         stage('Verify Pod') {
             steps {
-                // Check pod status
+                // Check if pod is running
                 sh 'kubectl get pods -o wide'
             }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pod created successfully!'
+        }
+        failure {
+            echo 'Something went wrong while creating the pod.'
         }
     }
 }
